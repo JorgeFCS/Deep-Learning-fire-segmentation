@@ -12,9 +12,9 @@ Alternatively, you can only use the functions that create the models and/or loss
 
 These models were trained and tested on an NVIDIA DGX-1 workstation with two NVIDIA P100 GPUs under Ubuntu 16.04.6 LTS, CUDA version 11.1, Python 3.6.9, and TensorFlow 2.3.0.
 
-If no GPUs are detected, the program should still run appropriately, although the training and inference times will be significantly increased.
-
 ## Configuration
+
+The code can rune with any given number of GPUs, as long as they are detected. You need to specify the IDs of the GPUs that you wish to use inside the *main.py* file. This, in order to control the use of GPUs in shared environments. If no GPUs are detected, the program should still run appropriately, although the training and inference times will be significantly increased.
 
 The code can perform one of three tasks per run: training, testing, and cross-validation. You need to set the option you wish to execute on the *config.ini* file, algonside the corresponding configuration requirements.
 
