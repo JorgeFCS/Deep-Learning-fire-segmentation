@@ -3,6 +3,11 @@ Implementation of several state-of-the-art Deep Learning models for fire semanti
 
 The different architectures and loss functions are used to create segmentation masks on images of the [Corsican Fire Database](https://feuxdeforet.universita.corsica/article.php?id_art=2133&id_rub=572&id_menu=0&id_cat=0&id_site=33&lang=en), available upon request to the University of Corsica.
 
+The program should run adequately with any kind of images, however. As long as you follow the naming conventions (prefixes) specified below, you should be able to use any
+dataset with images in PNG format. You would probably only need to adjust the cross-validation function (specifically, the pathing convention that we use) depending on your particular dataset and needs.
+
+Alternatively, you can only use the functions that create the models and/or loss functions, and instantiate and use them in your own particular training/testing pipelines.
+
 ## System requirements
 
 These models were trained and tested on an NVIDIA DGX-1 workstation with two NVIDIA P100 GPUs under Ubuntu 16.04.6 LTS, CUDA version 11.1, Python 3.6.9, and TensorFlow 2.3.0.
