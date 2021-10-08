@@ -99,7 +99,7 @@ def train(arch, loss, lr, epochs, dataset, save, save_path):
             # Mixed focal loss.
             m_focal_loss = mixed_focal_loss()
             model.compile(optimizer=optimizer, loss=m_focal_loss)
-            print("Mixed focal loss.")
+            print("Unified focal loss.")
     # Training the model.
     history = model.fit(dataset, epochs=epochs, verbose=1, callbacks=[tensorboard_callback, image_callback])
     print("Model trained!")
