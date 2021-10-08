@@ -103,9 +103,6 @@ def cv_create_model(arch, loss, lr, attention, attn_type=None):
         elif(loss == "Dice"):
             model.compile(optimizer=optimizer, loss=dice_loss)
             print("Dice loss.")
-        elif(loss == "Jaccard"):
-            model.compile(optimizer=optimizer, loss=jaccard_loss)
-            print("Jaccard loss.")
         elif(loss == "F_tversky"):
             f_tversky_loss = focal_tversky_loss()
             model.compile(optimizer=optimizer, loss=f_tversky_loss)
