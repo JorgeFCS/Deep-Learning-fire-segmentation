@@ -1,15 +1,33 @@
-# Class for custom image visualization in Tensorboard.
+#!/usr/bin/env python
+"""Class for the custom image visualization in TensorBoard.
+
+Last updated: 08-10-2021.
+"""
 
 # Imports.
 import io
 import tensorflow as tf
 from tensorflow import keras
 import matplotlib.pyplot as plt
-#from keras.callbacks import Callback
+
+__author__ = "Jorge Ciprian"
+__credits__ = ["Jorge Ciprian"]
+__license__ = "MIT"
+__version__ = "0.1.0"
+__status__ = "Development"
 
 class ImageCallback(keras.callbacks.Callback):
+    """ImageCallback class. Implements methods to display resulting sample
+    images of the training process in TensorBoard.
+    """
     # Constructor.
     def __init__(self, log_path, img, gt):
+        """Constructor for the class.
+
+        log_path: path in which to store the logs. String.
+        img: source image. Tensor.
+        gt: segmentation ground truth. Tensor.
+        """
         super(ImageCallback, self).__init__()
         self.writer = tf.summary.create_file_writer(log_path)
         self.img = img
@@ -17,14 +35,23 @@ class ImageCallback(keras.callbacks.Callback):
 
     # Method that generates the predicted mask.
     def get_mask(self):
+        """
+        Method that generates the predicted segmentation mask.
+        """
         input = tf.expand_dims(self.img, 0)
         mask = self.model(input)
-        #mask = tf.math.argmax(mask, axis=-1)
         mask = mask.numpy()
         return mask
 
     # Method that gets the output and logs all three images.
     def on_epoch_end(self, epoch, logs=None):
+        """
+        Method that gets the output figure and logs the source image, the
+        ground truth, and the segmentation mask.
+
+        epoch: current epoch. Int.
+        logs: metric results for this trainig epoch. Dictionary.
+        """
         # Generating image grid.
         figure = self.image_grid(epoch)
         # Getting figure png.
@@ -34,6 +61,11 @@ class ImageCallback(keras.callbacks.Callback):
 
     # Method that converts a matplotlib figure to a PNG image and returns it.
     def plot_to_image(self, figure):
+        """
+        Method that converts a Matplotlib figure to a PNG image.
+
+        figure: figure to convert. Matplotlib figure object.
+        """
         # Save the plot to a PNG in memory.
         buf = io.BytesIO()
         plt.savefig(buf, format='png')
@@ -49,6 +81,12 @@ class ImageCallback(keras.callbacks.Callback):
 
     # Method to create image grid.
     def image_grid(self, epoch):
+        """
+        Method that creates the subplots for the images, plots them, and returns
+        the resulting figure object.
+
+        epoch: current training epoch. Int.
+        """
         # Getting mask.
         mask = self.get_mask()
         # Create a figure to contain the plot.
