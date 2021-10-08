@@ -4,10 +4,6 @@ Implementation, training and evaluation of several state-of-the art
 Deep Learning (DL) architectures for fire segmentation, as well as three
 loss functions. Can train and test the models on visible, NIR, and fused images.
 Saves the obtained results.
-
-Jorge Ciprián
-Tecnológico de Monterrey, Mexico
-M.Sc. in Computer Science
 """
 
 # Imports.
@@ -67,16 +63,10 @@ if(task == "Train"):
     img_dir_path = config['TRAIN'].get('img_dir_path')
     mask_dir_path = config['TRAIN'].get('mask_dir_path')
     save = config['TRAIN'].getboolean('save')
-    if(arch == 'frizzi'):
-        flag_frizzi = config['TRAIN'].getboolean('flag_frizzi_pre')
-        print("FLAG: frizzi")
-    else:
-        flag_frizzi = False
-    if(save):
-        save_path = config['TRAIN'].get('save_path')
+    save_path = config['TRAIN'].get('save_path')
     # Creating dataset.
     print("Loading dataset...")
-    dataset = load_datasets(img_dir_path, mask_dir_path, batch_size, augment, flag_frizzi)
+    dataset = load_datasets(img_dir_path, mask_dir_path, batch_size, augment)
     print("... done!")
     # Initialize the data queue
     # for image, mask in dataset:
@@ -96,25 +86,17 @@ if(task == "Train"):
     #     break
     # Training model and saving results.
     print("Starting training process...")
-    if(save):
-        train(arch, loss, lr, epochs, dataset, save, save_path)
-    else:
-        train(arch, loss, lr, epochs, dataset, save)
+    train(arch, loss, lr, epochs, dataset, save, save_path)
     print("... done!")
 elif(task == "Test"):
     # Loading testing parameters.
     arch = config['TEST'].get('arch')
-    if(arch == 'frizzi'):
-        flag_frizzi = config['TEST'].getboolean('flag_frizzi_pre')
-        print("FLAG: frizzi")
-    else:
-        flag_frizzi = False
     model_path = config['TEST'].get('model_path')
     img_dir_path = config['TEST'].get('img_dir_path')
     img_save_path = config['TEST'].get('img_save_path')
     img_prefix = config['TEST'].get('img_prefix')
     print("Starting testing process...")
-    test(arch, model_path, img_dir_path, img_save_path, img_prefix, flag_frizzi)
+    test(arch, model_path, img_dir_path, img_save_path, img_prefix)
     print("... done!")
 else:
     # Loading cross validation parameters.

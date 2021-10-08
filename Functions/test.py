@@ -1,20 +1,38 @@
-################################################################################
-# Functions for testing a model and storing the generated images.              #
-#                                                                              #
-# @author Jorge Ciprián                                                        #
-# Last updated: 01/03/2021                                                     #
-################################################################################
+#!/usr/bin/env python
+"""Functions for testing a model and storing the generated images.
+
+Last updated: 01-03-2021.
+"""
 
 # Imports.
 from os import listdir
 import tensorflow as tf
 from os.path import isfile, join
-
+# Importing custom functions.
 from Models.frizzi import *
 from Models.akhloufi import *
 from Models.choi import create_choi
 
-def test(arch, model_path, img_dir_path, save_path, img_prefix, flag_frizzi):
+__author__ = "Jorge Ciprian"
+__credits__ = ["Jorge Ciprian"]
+__license__ = "MIT"
+__version__ = "0.1.0"
+__status__ = "Development"
+
+def test(arch, model_path, img_dir_path, save_path, img_prefix):
+    """Function that implements the testing process for a given model.
+
+    It loads a pre-trained model, reads the images in a given directory, and
+    outputs and saves the corresponding segmentation masks.
+
+    arch: architecture of the model. String.
+    model_path: path to the pre-trained weights of the model. String.
+    img_dir_path: path to the source image directory. String.
+    save_path: path to the save directory. String.
+    img_prefix: prefix that the source images have (e.g., rgb, nir, etc.) to
+                replace with the "mask" prefix to preserve image-mask pairing.
+                String.
+    """
     # Loading architecture.
     print("Loading model...")
     if(arch == 'akhloufi'):
@@ -46,10 +64,6 @@ def test(arch, model_path, img_dir_path, save_path, img_prefix, flag_frizzi):
         source_image_res = tf.image.resize(source_image,[384,512])
         source_image_res = normalization_layer(source_image_res)
         source_image_res = tf.expand_dims(source_image_res, axis=0)
-        if(flag_frizzi):
-            source_image_res = tf.image.convert_image_dtype(source_image_res, dtype=tf.uint8)
-            source_image_res = tf.cast(source_image_res, tf.float32)
-            source_image_res = tf.keras.applications.vgg16.preprocess_input(source_image_res)
         print("... done!")
         # Generating mask from model.
         print("Generating mask...")

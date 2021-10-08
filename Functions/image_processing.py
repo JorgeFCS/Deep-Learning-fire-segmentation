@@ -1,19 +1,29 @@
-#******************************************************************************
-# Image pre-processing functions.                                             *
-# @author Jorge Ciprián.                                                      *
-# Last updated: 26-02-2020.                                                   *
-# *****************************************************************************
+#!/usr/bin/env python
+"""Image pre-processing functions.
+
+Last updated: 26-02-2020.
+"""
 
 # Imports.
 import glob
 import tensorflow as tf
-#import tensorflow_io as tfio
 from tensorflow.keras import layers
 from Functions.data_augmentation import *
+
+__author__ = "Jorge Ciprian"
+__credits__ = ["Jorge Ciprian"]
+__license__ = "MIT"
+__version__ = "0.1.0"
+__status__ = "Development"
 
 #--------------------------------DECODING---------------------------------------
 # Function for decoding the compressed string into an RGB image.
 def decode_img(img):
+    """
+    Function for decoding the compressed string into a three-channel image.
+
+    img: compressed image string. Tensor.
+    """
     # Defining rescaling layer.
     normalization_layer = tf.keras.layers.experimental.preprocessing.Rescaling(1./255)
     # For PNG format.
@@ -28,6 +38,11 @@ def decode_img(img):
 
 # Function for decoding the compressed string into an image.
 def decode_mask(img):
+    """
+    Function for decoding the compressed string into a one-channel image.
+
+    img: compressed image string. Tensor.
+    """
     # Defining rescaling layer.
     normalization_layer = tf.keras.layers.experimental.preprocessing.Rescaling(1./255)
     # For PNG format.
@@ -36,26 +51,27 @@ def decode_mask(img):
     img = tf.image.resize(img,[384,512])
     img = normalization_layer(img)
     return img
-
-# Function for pre-processing the values.
-def vgg16pre(img):
-    #normalization_layer = tf.keras.layers.experimental.preprocessing.Rescaling(255.)
-    #img = normalization_layer(img)
-    img = tf.image.convert_image_dtype(img, dtype=tf.uint8)
-    img = tf.cast(img, tf.float32)
-    img = tf.keras.applications.vgg16.preprocess_input(img)
-    return img
 #--------------------------------DECODING---------------------------------------
 
 #----------------------------PATH PROCESSING------------------------------------
 # Processes the path for a given image.
 def process_path_img(file_path):
+    """
+    Function that processes the path for a given image.
+
+    file_path: path to the image to read. String.
+    """
     img = tf.io.read_file(file_path)
     img = decode_img(img)
     return img
 
 # Processes the path for a given image.
 def process_path_mask(file_path):
+    """
+    Function that processes the path for a given mask.
+
+    file_path: path to the mask to read. String.
+    """
     img = tf.io.read_file(file_path)
     img = decode_mask(img)
     return img
@@ -63,6 +79,11 @@ def process_path_mask(file_path):
 
 #----------------------AUGMENTING DATASET---------------------------------------
 def augment_dataset(ds):
+    """
+    Function that performs the data augmentation of a given dataset.
+
+    ds: the dataset to be augmented. TensorFlow Dataset object.
+    """
     ds_mirror = ds.map(a_mirror_image,num_parallel_calls=tf.data.experimental.AUTOTUNE)
     ds = ds.concatenate(ds_mirror)
     ds_rotate_180 = ds.map(a_rotate_180,num_parallel_calls=tf.data.experimental.AUTOTUNE)
@@ -78,12 +99,18 @@ def augment_dataset(ds):
 #----------------------CONFIGURING FOR PERFORMANCE------------------------------
 # Configures the dataset for good performance.
 def configure_for_performance_(ds,batch_size):
+    """
+    Function that configures the dataset for performance.
+
+    ds: dataset to be configured. TensorFlow Dataset object.
+    batch_size: batch size. Int.
+    """
     ds_size = tf.data.experimental.cardinality(ds).numpy()
-    ds_size = ds_size*batch_size # 32 for the batch size.
+    ds_size = ds_size*batch_size
     #print("Size of dataset: ", tf.data.experimental.cardinality(ds).numpy())
     ds = ds.cache()
     ds = ds.shuffle(buffer_size=ds_size, seed=1)
-    ds = ds.batch(batch_size) # Batch size of 32.
+    ds = ds.batch(batch_size)
     ds = ds.prefetch(buffer_size = tf.data.experimental.AUTOTUNE)
     return ds
 #----------------------CONFIGURING FOR PERFORMANCE------------------------------
@@ -91,7 +118,18 @@ def configure_for_performance_(ds,batch_size):
 #-----------------------LOADING DATASET AND PROCESSING IMAGES-------------------
 # Function for loading the datasets. It loads both the images and masks,
 # shuffles them equally, and returns the resulting datasets.
-def load_datasets(img_path, mask_path, batch_size, augment, flag_frizzi):
+def load_datasets(img_path, mask_path, batch_size, augment):
+    """
+    Function for loading the image and masks datasets.
+
+    Loads both the images and masks, shuffles them equally, and returns the
+    resulting datasets.
+
+    img_path: path to the source images. String.
+    mask_path: path to the source masks. String.
+    batch_size: batch size parameter for the dataset. Int.
+    augment: flag for data augmentation. Boolean.
+    """
     # Getting the total number of images.
     image_count = len(list(glob.glob(img_path)))
     print("Number of images: ",image_count)
@@ -108,10 +146,6 @@ def load_datasets(img_path, mask_path, batch_size, augment, flag_frizzi):
     dataset_images_full = dataset_images.map(lambda x: process_path_img(x), num_parallel_calls=tf.data.experimental.AUTOTUNE)
     if(augment):
         dataset_images_full = augment_dataset(dataset_images_full)
-    if(flag_frizzi):
-        print("Pre-processing for VGG16...")
-        dataset_images_full = dataset_images_full.map(lambda x: vgg16pre(x), num_parallel_calls=tf.data.experimental.AUTOTUNE)
-        print("... done.")
     dataset_images_full = configure_for_performance_(dataset_images_full,batch_size)
     print("Prepared full image batches: ",tf.data.experimental.cardinality(dataset_images_full).numpy())
     # Full dataset masks.
