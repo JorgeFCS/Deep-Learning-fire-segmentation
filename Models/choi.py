@@ -1,19 +1,30 @@
-#******************************************************************************
-# Functions for implementing the model proposed by Choi et al. for            *
-# fire segmentation.                                                          *
-#                                                                             *
-# @author Jorge Ciprián.                                                      *
-# Last updated: 14-02-2020.                                                   *
-# *****************************************************************************
+#!/usr/bin/env python
+"""Functions for implementing the model proposed by Choi et al. (see
+README file for details).
+
+Last updatead: 14-02-2020.
+"""
 
 # Imports.
 import tensorflow as tf
 from tensorflow import keras
-#from tensorflow.keras import layers
 from tensorflow.keras.layers import Conv2D, BatchNormalization, Conv2DTranspose, Add, LayerNormalization
 
-# Generate a "yellow block" as defined in the paper by Choi et al.
+__author__ = "Jorge Ciprian"
+__credits__ = ["Jorge Ciprian"]
+__license__ = "MIT"
+__version__ = "0.1.0"
+__status__ = "Development"
+
 def yellow_block(x, num_filters):
+    """
+    Function that generates a "yellow block" as defined in the paper by
+    Choi et al.
+
+    x: result from previous layer. Tensor.
+    num_filters: number of filters in the convolutional layers and the purple
+                 block. Int.
+    """
     x_s = Conv2D(num_filters, (1, 1), strides = (1,1), kernel_initializer='he_uniform', padding='same', activation='relu')(x) # Skip connection.
     x_res = Conv2D(num_filters, (3, 3), strides = (1,1), kernel_initializer='he_uniform', padding='same', activation='relu')(x_s)
     x_res = BatchNormalization()(x_res)
@@ -23,8 +34,14 @@ def yellow_block(x, num_filters):
     x_res = Add()([x_s, x_res])
     return x_res
 
-# Generate a "purple block" as defined in the paper by Choi et al.
 def purple_block(x, num_filters):
+    """
+    Function that generates a "purple block" as defined in the paper by
+    Choi et al.
+
+    x: result from the previous layer. Tensor.
+    num_filters: number of filters in the convolutional layers. Int.
+    """
     x_s = x # Skip connection.
     x_res = Conv2D(num_filters, (3, 3), strides = (1,1), kernel_initializer='he_uniform', padding='same', activation='relu')(x_s)
     x_res = BatchNormalization()(x_res)
@@ -37,6 +54,9 @@ def purple_block(x, num_filters):
 
 # Main network.
 def create_choi():
+    """
+    Function that constructs the main Choi model.
+    """
     # The input will be a tensor of the three-channel input image.
     # For the skip connections, we use the Keras functional API to create the model.
     # Input block.
@@ -92,9 +112,6 @@ def create_choi():
     x = Add()([x_s1, x])
     # Nineteenth block - green - output convolution.
     outputs = Conv2D(1, (3, 3), strides = (1,1), kernel_initializer='he_uniform', padding='same', activation='relu')(x)
-    # Output - potentially this normalization layers does not go here.
-    #outputs = LayerNormalization()(x)
-
     # Constructing the model.
     model_choi = keras.Model(inputs=inputs, outputs=outputs, name="model_choi")
     # Showing summary of the model.

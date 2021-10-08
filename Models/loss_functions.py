@@ -1,15 +1,21 @@
-#******************************************************************************
-# Functions for implementing different loss functions.                        *
-#                                                                             *
-# Obtained from: https://github.com/mlyg/unified-focal-loss                   *
-# Last updated: 14-02-2020.                                                   *
-# *****************************************************************************
+#!/usr/bin/env python
+"""Functions for implementing different loss functions.
+
+Obtained from: https://github.com/mlyg/unified-focal-loss
+
+Last updated: 14-02-2020.
+"""
 
 # Imports.
-#import keras.backend as K
 import tensorflow as tf
 from tensorflow.keras import layers
 from tensorflow.keras import backend as K
+
+__author__ = "Jorge Ciprian"
+__credits__ = ["Jorge Ciprian"]
+__license__ = "MIT"
+__version__ = "0.1.0"
+__status__ = "Development"
 
 def cross_entropy(y_true, y_pred):
     flat_layer = layers.Flatten()

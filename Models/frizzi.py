@@ -1,50 +1,32 @@
-#******************************************************************************
-# Functions for implementing the model proposed by Frizzi et al. for          *
-# fire segmentation. The authors specify that the encoder segment loads       *
-# pre-trained weights from the VGG16 network on the ImageNet; here I do that  *
-# as well.                                                                    *
-#                                                                             *
-# @author Jorge Ciprián.                                                      *
-# Last updated: 23-02-2020.                                                   *
-# *****************************************************************************
+#!/usr/bin/env python
+"""Functions for implementing the model proposed by Frizzi et al. (see
+README file for details).
+
+The authors specifiy that the encoder loads weights from the VGG16 model
+pre-trained on the ImageNet. However, I found experimentally that training the
+weights from scratch allowed for better results; as such, I implement the model
+without loading pre-trained weights.
+
+Last updated: 08-10-2021.
+"""
 
 # Imports.
 import tensorflow as tf
 from tensorflow import keras
-from tensorflow.keras.applications import VGG16
 from tensorflow.keras.layers import Conv2D, Conv2DTranspose, MaxPool2D, Concatenate
+
+__author__ = "Jorge Ciprian"
+__credits__ = ["Jorge Ciprian"]
+__license__ = "MIT"
+__version__ = "0.1.0"
+__status__ = "Development"
 
 # Functions that creates the model.
 def create_frizzi():
-    # The input will be a tensor of the three-channel input image.
-    # For the skip connections, we use the Keras functional API to create the model.
-    # inputs = keras.Input(shape=(384,512,3))
-    # #inputs_vgg = tf.keras.applications.vgg16.preprocess_input(inputs)
-    # encoder = VGG16(include_top=False, weights='imagenet', input_tensor=inputs)
-    # #encoder.trainable = False
-    #
-    # # Sixth block - Here is no longer VGG16 architecture.
-    # x = Conv2D(1024, (7, 7), strides = (1,1), kernel_initializer='glorot_uniform', padding='same')(encoder.layers[-1].output)
-    # #print(x.shape)
-    # # Seventh block -- Decoder starts.
-    # x = Conv2DTranspose(512, (4, 4), strides = (2,2), kernel_initializer='glorot_uniform', padding='same')(x)
-    # x = Concatenate()([encoder.layers[-5].output, x]) # Skip connection with x_s2.
-    # x = Conv2D(512, (3, 3), strides = (1,1), kernel_initializer='glorot_uniform', padding='same', activation='relu')(x)
-    # #print(x.shape)
-    # # Eight block.
-    # x = Conv2DTranspose(256, (4, 4), strides = (2,2), kernel_initializer='glorot_uniform', padding='same')(x)
-    # x = Concatenate()([encoder.layers[-9].output, x]) # Skip connection with x_s1.
-    # x = Conv2D(256, (3, 3), strides = (1,1), kernel_initializer='glorot_uniform', padding='same', activation='relu')(x)
-    # #print(x.shape)
-    # # Ninth block (output block).
-    # x = Conv2DTranspose(3, (16, 16), strides = (8,8), kernel_initializer='glorot_uniform', padding='same')(x)
-    # outputs = Conv2D(1, (1, 1), strides = (1,1), kernel_initializer='glorot_uniform', padding='same', name='output', activation='sigmoid')(x)
-    # #print(outputs.shape)
-    #
-    # # Constructing the model.
-    # model_frizzi = keras.Model(inputs=encoder.input, outputs=outputs, name="model_frizzi")
-
-    # # Input block.
+    """
+    Function that creates the Frizzi model.
+    """
+    # Input block.
     inputs = keras.Input(shape=(384,512,3))
     # First block.
     x = Conv2D(64, (3, 3), strides = (1,1), kernel_initializer='glorot_uniform', padding='same', activation='relu')(inputs)
@@ -89,16 +71,9 @@ def create_frizzi():
     #print(x.shape)
     # Ninth block (output block).
     outputs = Conv2DTranspose(1, (16, 16), strides = (8,8), kernel_initializer='glorot_uniform', padding='same', activation='relu')(x)
-    # x = tf.math.argmax(x, axis=-1)
-    # x = tf.cast(x, tf.float32)
-    # outputs = tf.expand_dims(x, 3)
-    #outputs = Conv2D(1, (1, 1), strides = (1,1), kernel_initializer='glorot_uniform', padding='same', activation='relu', name='output')(x)
     #print(outputs.shape)
-
     # Constructing the model.
     model_frizzi = keras.Model(inputs=inputs, outputs=outputs, name="model_frizzi")
-
     model_frizzi.summary()
-
     # Returning the model.
     return model_frizzi

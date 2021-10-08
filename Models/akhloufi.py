@@ -1,10 +1,9 @@
-#******************************************************************************
-# Functions for implementing the model proposed by Akhloufi et al. for        *
-# fire segmentation.                                                          *
-#                                                                             *
-# @author Jorge Ciprián.                                                      *
-# Last updated: 14-02-2020.                                                   *
-# *****************************************************************************
+#!/usr/bin/env python
+"""Functions for implementing the model proposed by Akhloufi et al. (see
+README file for details).
+
+Last updated: 14-02-2020.
+"""
 
 # Imports.
 import tensorflow as tf
@@ -14,17 +13,25 @@ from tensorflow.keras import layers
 from keras.layers.normalization import BatchNormalization
 from keras.layers import Activation, add,  multiply, Lambda
 from keras.layers import Conv2D, Conv2DTranspose, Concatenate, MaxPool2D, UpSampling2D
-
+# Importing custom functions.
 from Models.attention_modules import *
+
+__author__ = "Jorge Ciprian"
+__credits__ = ["Jorge Ciprian"]
+__license__ = "MIT"
+__version__ = "0.1.0"
+__status__ = "Development"
 
 #----------------------REGULAR U-NET ARCHITECTURE-------------------------------
 # Functions that creates the model.
 def create_akhloufi():
+    """
+    Function that creates the model as-is, without any added features.
+    """
     # The input will be a tensor of the three-channel input image.
     # For the skip connections, we use the Keras functional API to create the model.
     # Input block.
-    inputs = keras.Input(shape=(384,512,3)) # May have to be 512, 384
-
+    inputs = keras.Input(shape=(384,512,3))
     # First block.
     x = Conv2D(16, (3, 3), strides = (1,1), kernel_initializer='he_uniform', padding='same', activation='elu')(inputs)
     x_s1 = Conv2D(16, (3, 3), strides = (1,1), kernel_initializer='he_uniform', padding='same', activation='elu')(x) # Skip connection.
@@ -66,7 +73,6 @@ def create_akhloufi():
     x = Conv2D(16, (3, 3), strides = (1,1), kernel_initializer='he_uniform', padding='same', activation='elu')(x)
     # Output block.
     outputs = Conv2D(1, (1, 1), strides = (1,1), kernel_initializer='he_uniform', padding='same', activation='sigmoid')(x)
-
     # Constructing the model.
     model_akhloufi = keras.Model(inputs=inputs, outputs=outputs, name="model_akhloufi")
     # Showing summary of the model.
@@ -81,11 +87,13 @@ def create_akhloufi():
 
 # Creating U-Net with the attention modules.
 def create_att_akhloufi():
+    """
+    Creates the Akhloufi model adding the Attention Gate (AG) component.
+    """
     # The input will be a tensor of the three-channel input image.
     # For the skip connections, we use the Keras functional API to create the model.
     # Input block.
     inputs = keras.Input(shape=(384,512,3))
-
     # First block.
     x = Conv2D(16, (3, 3), strides = (1,1), kernel_initializer='he_uniform', padding='same', activation='elu')(inputs)
     x_s1 = Conv2D(16, (3, 3), strides = (1,1), kernel_initializer='he_uniform', padding='same', activation='elu')(x) # Skip connection.
@@ -129,12 +137,10 @@ def create_att_akhloufi():
     x = Concatenate()([x_att1, x]) # Here
     x = Conv2D(16, (3, 3), strides = (1,1), kernel_initializer='he_uniform', padding='same', activation='elu')(x)
     x = Conv2D(16, (3, 3), strides = (1,1), kernel_initializer='he_uniform', padding='same', activation='elu')(x)
-
     # Output block.
     outputs = Conv2D(1, (1, 1), strides = (1,1), kernel_initializer='he_uniform', padding='same', activation='sigmoid')(x)
-
     # Constructing the model.
-    model_akhloufi = keras.Model(inputs=inputs, outputs=outputs, name="model_att_akhloufi")
+    model_akhloufi = keras.Model(inputs=inputs, outputs=outputs, name="model_att_akhloufi_ag")
     # Showing summary of the model.
     model_akhloufi.summary()
     # Returning model.
@@ -145,11 +151,13 @@ def create_att_akhloufi():
 #----------------SPATIAL ATTENTION U-NET ARCHITECTURE---------------------------
 # Functions that creates the model.
 def create_sp_attn_akhloufi():
+    """
+    Creates the Akhloufi model adding Spatial Attention (SA) modules.
+    """
     # The input will be a tensor of the three-channel input image.
     # For the skip connections, we use the Keras functional API to create the model.
     # Input block.
-    inputs = keras.Input(shape=(384,512,3)) # May have to be 512, 384
-
+    inputs = keras.Input(shape=(384,512,3))
     # First block.
     x = Conv2D(16, (3, 3), strides = (1,1), kernel_initializer='he_uniform', padding='same', activation='elu')(inputs)
     x_s1 = Conv2D(16, (3, 3), strides = (1,1), kernel_initializer='he_uniform', padding='same', activation='elu')(x) # Skip connection.
@@ -192,9 +200,8 @@ def create_sp_attn_akhloufi():
     x = Conv2D(16, (3, 3), strides = (1,1), kernel_initializer='he_uniform', padding='same', activation='elu')(x)
     # Output block.
     outputs = Conv2D(1, (1, 1), strides = (1,1), kernel_initializer='he_uniform', padding='same', activation='sigmoid')(x)
-
     # Constructing the model.
-    model_akhloufi = keras.Model(inputs=inputs, outputs=outputs, name="model_akhloufi")
+    model_akhloufi = keras.Model(inputs=inputs, outputs=outputs, name="model_att_akhloufi_sa")
     # Showing summary of the model.
     model_akhloufi.summary()
     # Returning the model.
@@ -204,11 +211,13 @@ def create_sp_attn_akhloufi():
 #----------------CHANNEL ATTENTION U-NET ARCHITECTURE---------------------------
 # Creating model.
 def create_ch_att_akhloufi():
+    """
+    Creates the Akhloufi model with added channel attention (MECA) modules.
+    """
     # The input will be a tensor of the three-channel input image.
     # For the skip connections, we use the Keras functional API to create the model.
     # Input block.
     inputs = keras.Input(shape=(384,512,3))
-
     # First block.
     x = Conv2D(16, (3, 3), strides = (1,1), kernel_initializer='he_uniform', padding='same', activation='elu')(inputs)
     x_s1 = Conv2D(16, (3, 3), strides = (1,1), kernel_initializer='he_uniform', padding='same', activation='elu')(x) # Skip connection.
@@ -252,12 +261,10 @@ def create_ch_att_akhloufi():
     x = Concatenate()([x_att1, x]) # Here
     x = Conv2D(16, (3, 3), strides = (1,1), kernel_initializer='he_uniform', padding='same', activation='elu')(x)
     x = Conv2D(16, (3, 3), strides = (1,1), kernel_initializer='he_uniform', padding='same', activation='elu')(x)
-
     # Output block.
     outputs = Conv2D(1, (1, 1), strides = (1,1), kernel_initializer='he_uniform', padding='same', activation='sigmoid')(x)
-
     # Constructing the model.
-    model_akhloufi = keras.Model(inputs=inputs, outputs=outputs, name="model_att_akhloufi")
+    model_akhloufi = keras.Model(inputs=inputs, outputs=outputs, name="model_att_akhloufi_meca")
     # Showing summary of the model.
     model_akhloufi.summary()
     # Returning model.
